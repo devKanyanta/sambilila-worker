@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { prisma } from "../lib/db";
+import { prisma } from "./db";
 import { downloadFromDropbox } from "./dropbox";
 import { extractTextFromPDF } from "./pdf";
 import { generateFlashcardsFromText } from "./gemini";
