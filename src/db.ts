@@ -10,7 +10,7 @@ const connectionString = process.env.DATABASE_URL!;
 const pool = new Pool({
   connectionString,
   // Clever Cloud recommendations:
-  max: 10, // Maximum number of clients in the pool
+  max: 3, // Maximum number of clients in the pool
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
   connectionTimeoutMillis: 5000, // Return an error after 5 seconds if connection not established
   maxUses: 7500, // Close and replace a connection after it's been used 7500 times
