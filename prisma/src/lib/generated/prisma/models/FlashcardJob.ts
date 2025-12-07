@@ -230,6 +230,7 @@ export type FlashcardJobWhereInput = {
   error?: Prisma.StringNullableFilter<"FlashcardJob"> | string | null
   flashcardSetId?: Prisma.StringNullableFilter<"FlashcardJob"> | string | null
   createdAt?: Prisma.DateTimeFilter<"FlashcardJob"> | Date | string
+  flashcardSet?: Prisma.XOR<Prisma.FlashcardSetNullableScalarRelationFilter, Prisma.FlashcardSetWhereInput> | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -245,6 +246,7 @@ export type FlashcardJobOrderByWithRelationInput = {
   error?: Prisma.SortOrderInput | Prisma.SortOrder
   flashcardSetId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  flashcardSet?: Prisma.FlashcardSetOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -263,6 +265,7 @@ export type FlashcardJobWhereUniqueInput = Prisma.AtLeast<{
   error?: Prisma.StringNullableFilter<"FlashcardJob"> | string | null
   flashcardSetId?: Prisma.StringNullableFilter<"FlashcardJob"> | string | null
   createdAt?: Prisma.DateTimeFilter<"FlashcardJob"> | Date | string
+  flashcardSet?: Prisma.XOR<Prisma.FlashcardSetNullableScalarRelationFilter, Prisma.FlashcardSetWhereInput> | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
@@ -309,8 +312,8 @@ export type FlashcardJobCreateInput = {
   description?: string | null
   status?: $Enums.JobStatus
   error?: string | null
-  flashcardSetId?: string | null
   createdAt?: Date | string
+  flashcardSet?: Prisma.FlashcardSetCreateNestedOneWithoutFlashcardJobsInput
   user: Prisma.UserCreateNestedOneWithoutFlashcardJobsInput
 }
 
@@ -337,8 +340,8 @@ export type FlashcardJobUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  flashcardSetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  flashcardSet?: Prisma.FlashcardSetUpdateOneWithoutFlashcardJobsNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutFlashcardJobsNestedInput
 }
 
@@ -379,7 +382,6 @@ export type FlashcardJobUpdateManyMutationInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  flashcardSetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -491,6 +493,48 @@ export type FlashcardJobUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.FlashcardJobScalarWhereInput | Prisma.FlashcardJobScalarWhereInput[]
 }
 
+export type FlashcardJobCreateNestedManyWithoutFlashcardSetInput = {
+  create?: Prisma.XOR<Prisma.FlashcardJobCreateWithoutFlashcardSetInput, Prisma.FlashcardJobUncheckedCreateWithoutFlashcardSetInput> | Prisma.FlashcardJobCreateWithoutFlashcardSetInput[] | Prisma.FlashcardJobUncheckedCreateWithoutFlashcardSetInput[]
+  connectOrCreate?: Prisma.FlashcardJobCreateOrConnectWithoutFlashcardSetInput | Prisma.FlashcardJobCreateOrConnectWithoutFlashcardSetInput[]
+  createMany?: Prisma.FlashcardJobCreateManyFlashcardSetInputEnvelope
+  connect?: Prisma.FlashcardJobWhereUniqueInput | Prisma.FlashcardJobWhereUniqueInput[]
+}
+
+export type FlashcardJobUncheckedCreateNestedManyWithoutFlashcardSetInput = {
+  create?: Prisma.XOR<Prisma.FlashcardJobCreateWithoutFlashcardSetInput, Prisma.FlashcardJobUncheckedCreateWithoutFlashcardSetInput> | Prisma.FlashcardJobCreateWithoutFlashcardSetInput[] | Prisma.FlashcardJobUncheckedCreateWithoutFlashcardSetInput[]
+  connectOrCreate?: Prisma.FlashcardJobCreateOrConnectWithoutFlashcardSetInput | Prisma.FlashcardJobCreateOrConnectWithoutFlashcardSetInput[]
+  createMany?: Prisma.FlashcardJobCreateManyFlashcardSetInputEnvelope
+  connect?: Prisma.FlashcardJobWhereUniqueInput | Prisma.FlashcardJobWhereUniqueInput[]
+}
+
+export type FlashcardJobUpdateManyWithoutFlashcardSetNestedInput = {
+  create?: Prisma.XOR<Prisma.FlashcardJobCreateWithoutFlashcardSetInput, Prisma.FlashcardJobUncheckedCreateWithoutFlashcardSetInput> | Prisma.FlashcardJobCreateWithoutFlashcardSetInput[] | Prisma.FlashcardJobUncheckedCreateWithoutFlashcardSetInput[]
+  connectOrCreate?: Prisma.FlashcardJobCreateOrConnectWithoutFlashcardSetInput | Prisma.FlashcardJobCreateOrConnectWithoutFlashcardSetInput[]
+  upsert?: Prisma.FlashcardJobUpsertWithWhereUniqueWithoutFlashcardSetInput | Prisma.FlashcardJobUpsertWithWhereUniqueWithoutFlashcardSetInput[]
+  createMany?: Prisma.FlashcardJobCreateManyFlashcardSetInputEnvelope
+  set?: Prisma.FlashcardJobWhereUniqueInput | Prisma.FlashcardJobWhereUniqueInput[]
+  disconnect?: Prisma.FlashcardJobWhereUniqueInput | Prisma.FlashcardJobWhereUniqueInput[]
+  delete?: Prisma.FlashcardJobWhereUniqueInput | Prisma.FlashcardJobWhereUniqueInput[]
+  connect?: Prisma.FlashcardJobWhereUniqueInput | Prisma.FlashcardJobWhereUniqueInput[]
+  update?: Prisma.FlashcardJobUpdateWithWhereUniqueWithoutFlashcardSetInput | Prisma.FlashcardJobUpdateWithWhereUniqueWithoutFlashcardSetInput[]
+  updateMany?: Prisma.FlashcardJobUpdateManyWithWhereWithoutFlashcardSetInput | Prisma.FlashcardJobUpdateManyWithWhereWithoutFlashcardSetInput[]
+  deleteMany?: Prisma.FlashcardJobScalarWhereInput | Prisma.FlashcardJobScalarWhereInput[]
+}
+
+export type FlashcardJobUncheckedUpdateManyWithoutFlashcardSetNestedInput = {
+  create?: Prisma.XOR<Prisma.FlashcardJobCreateWithoutFlashcardSetInput, Prisma.FlashcardJobUncheckedCreateWithoutFlashcardSetInput> | Prisma.FlashcardJobCreateWithoutFlashcardSetInput[] | Prisma.FlashcardJobUncheckedCreateWithoutFlashcardSetInput[]
+  connectOrCreate?: Prisma.FlashcardJobCreateOrConnectWithoutFlashcardSetInput | Prisma.FlashcardJobCreateOrConnectWithoutFlashcardSetInput[]
+  upsert?: Prisma.FlashcardJobUpsertWithWhereUniqueWithoutFlashcardSetInput | Prisma.FlashcardJobUpsertWithWhereUniqueWithoutFlashcardSetInput[]
+  createMany?: Prisma.FlashcardJobCreateManyFlashcardSetInputEnvelope
+  set?: Prisma.FlashcardJobWhereUniqueInput | Prisma.FlashcardJobWhereUniqueInput[]
+  disconnect?: Prisma.FlashcardJobWhereUniqueInput | Prisma.FlashcardJobWhereUniqueInput[]
+  delete?: Prisma.FlashcardJobWhereUniqueInput | Prisma.FlashcardJobWhereUniqueInput[]
+  connect?: Prisma.FlashcardJobWhereUniqueInput | Prisma.FlashcardJobWhereUniqueInput[]
+  update?: Prisma.FlashcardJobUpdateWithWhereUniqueWithoutFlashcardSetInput | Prisma.FlashcardJobUpdateWithWhereUniqueWithoutFlashcardSetInput[]
+  updateMany?: Prisma.FlashcardJobUpdateManyWithWhereWithoutFlashcardSetInput | Prisma.FlashcardJobUpdateManyWithWhereWithoutFlashcardSetInput[]
+  deleteMany?: Prisma.FlashcardJobScalarWhereInput | Prisma.FlashcardJobScalarWhereInput[]
+}
+
 export type EnumJobStatusFieldUpdateOperationsInput = {
   set?: $Enums.JobStatus
 }
@@ -504,8 +548,8 @@ export type FlashcardJobCreateWithoutUserInput = {
   description?: string | null
   status?: $Enums.JobStatus
   error?: string | null
-  flashcardSetId?: string | null
   createdAt?: Date | string
+  flashcardSet?: Prisma.FlashcardSetCreateNestedOneWithoutFlashcardJobsInput
 }
 
 export type FlashcardJobUncheckedCreateWithoutUserInput = {
@@ -564,6 +608,58 @@ export type FlashcardJobScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"FlashcardJob"> | Date | string
 }
 
+export type FlashcardJobCreateWithoutFlashcardSetInput = {
+  id?: string
+  fileUrl?: string | null
+  text?: string | null
+  title: string
+  subject: string
+  description?: string | null
+  status?: $Enums.JobStatus
+  error?: string | null
+  createdAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutFlashcardJobsInput
+}
+
+export type FlashcardJobUncheckedCreateWithoutFlashcardSetInput = {
+  id?: string
+  userId: string
+  fileUrl?: string | null
+  text?: string | null
+  title: string
+  subject: string
+  description?: string | null
+  status?: $Enums.JobStatus
+  error?: string | null
+  createdAt?: Date | string
+}
+
+export type FlashcardJobCreateOrConnectWithoutFlashcardSetInput = {
+  where: Prisma.FlashcardJobWhereUniqueInput
+  create: Prisma.XOR<Prisma.FlashcardJobCreateWithoutFlashcardSetInput, Prisma.FlashcardJobUncheckedCreateWithoutFlashcardSetInput>
+}
+
+export type FlashcardJobCreateManyFlashcardSetInputEnvelope = {
+  data: Prisma.FlashcardJobCreateManyFlashcardSetInput | Prisma.FlashcardJobCreateManyFlashcardSetInput[]
+  skipDuplicates?: boolean
+}
+
+export type FlashcardJobUpsertWithWhereUniqueWithoutFlashcardSetInput = {
+  where: Prisma.FlashcardJobWhereUniqueInput
+  update: Prisma.XOR<Prisma.FlashcardJobUpdateWithoutFlashcardSetInput, Prisma.FlashcardJobUncheckedUpdateWithoutFlashcardSetInput>
+  create: Prisma.XOR<Prisma.FlashcardJobCreateWithoutFlashcardSetInput, Prisma.FlashcardJobUncheckedCreateWithoutFlashcardSetInput>
+}
+
+export type FlashcardJobUpdateWithWhereUniqueWithoutFlashcardSetInput = {
+  where: Prisma.FlashcardJobWhereUniqueInput
+  data: Prisma.XOR<Prisma.FlashcardJobUpdateWithoutFlashcardSetInput, Prisma.FlashcardJobUncheckedUpdateWithoutFlashcardSetInput>
+}
+
+export type FlashcardJobUpdateManyWithWhereWithoutFlashcardSetInput = {
+  where: Prisma.FlashcardJobScalarWhereInput
+  data: Prisma.XOR<Prisma.FlashcardJobUpdateManyMutationInput, Prisma.FlashcardJobUncheckedUpdateManyWithoutFlashcardSetInput>
+}
+
 export type FlashcardJobCreateManyUserInput = {
   id?: string
   fileUrl?: string | null
@@ -586,8 +682,8 @@ export type FlashcardJobUpdateWithoutUserInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  flashcardSetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  flashcardSet?: Prisma.FlashcardSetUpdateOneWithoutFlashcardJobsNestedInput
 }
 
 export type FlashcardJobUncheckedUpdateWithoutUserInput = {
@@ -616,6 +712,58 @@ export type FlashcardJobUncheckedUpdateManyWithoutUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type FlashcardJobCreateManyFlashcardSetInput = {
+  id?: string
+  userId: string
+  fileUrl?: string | null
+  text?: string | null
+  title: string
+  subject: string
+  description?: string | null
+  status?: $Enums.JobStatus
+  error?: string | null
+  createdAt?: Date | string
+}
+
+export type FlashcardJobUpdateWithoutFlashcardSetInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  subject?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutFlashcardJobsNestedInput
+}
+
+export type FlashcardJobUncheckedUpdateWithoutFlashcardSetInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  subject?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type FlashcardJobUncheckedUpdateManyWithoutFlashcardSetInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  subject?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type FlashcardJobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -630,6 +778,7 @@ export type FlashcardJobSelect<ExtArgs extends runtime.Types.Extensions.Internal
   error?: boolean
   flashcardSetId?: boolean
   createdAt?: boolean
+  flashcardSet?: boolean | Prisma.FlashcardJob$flashcardSetArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["flashcardJob"]>
 
@@ -645,6 +794,7 @@ export type FlashcardJobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   error?: boolean
   flashcardSetId?: boolean
   createdAt?: boolean
+  flashcardSet?: boolean | Prisma.FlashcardJob$flashcardSetArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["flashcardJob"]>
 
@@ -660,6 +810,7 @@ export type FlashcardJobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   error?: boolean
   flashcardSetId?: boolean
   createdAt?: boolean
+  flashcardSet?: boolean | Prisma.FlashcardJob$flashcardSetArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["flashcardJob"]>
 
@@ -679,18 +830,22 @@ export type FlashcardJobSelectScalar = {
 
 export type FlashcardJobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "fileUrl" | "text" | "title" | "subject" | "description" | "status" | "error" | "flashcardSetId" | "createdAt", ExtArgs["result"]["flashcardJob"]>
 export type FlashcardJobInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  flashcardSet?: boolean | Prisma.FlashcardJob$flashcardSetArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type FlashcardJobIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  flashcardSet?: boolean | Prisma.FlashcardJob$flashcardSetArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type FlashcardJobIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  flashcardSet?: boolean | Prisma.FlashcardJob$flashcardSetArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $FlashcardJobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "FlashcardJob"
   objects: {
+    flashcardSet: Prisma.$FlashcardSetPayload<ExtArgs> | null
     user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1099,6 +1254,7 @@ readonly fields: FlashcardJobFieldRefs;
  */
 export interface Prisma__FlashcardJobClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  flashcardSet<T extends Prisma.FlashcardJob$flashcardSetArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FlashcardJob$flashcardSetArgs<ExtArgs>>): Prisma.Prisma__FlashcardSetClient<runtime.Types.Result.GetResult<Prisma.$FlashcardSetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1533,6 +1689,25 @@ export type FlashcardJobDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many FlashcardJobs to delete.
    */
   limit?: number
+}
+
+/**
+ * FlashcardJob.flashcardSet
+ */
+export type FlashcardJob$flashcardSetArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FlashcardSet
+   */
+  select?: Prisma.FlashcardSetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FlashcardSet
+   */
+  omit?: Prisma.FlashcardSetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FlashcardSetInclude<ExtArgs> | null
+  where?: Prisma.FlashcardSetWhereInput
 }
 
 /**
