@@ -82,22 +82,41 @@ async function processJob(job: any) {
   }
 }
 
+// In your worker, add this debug code:
 async function pollJobs() {
   console.log('🔍 Polling for new jobs...')
   
   try {
-    // Find pending jobs (oldest first)
+    // First, let's check what tables exist
+    const tables = await prisma.$queryRaw`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public'
+    `
+    console.log('📊 Available tables:', tables)
+    
+    // Check specifically for flashcard_jobs
+    const flashcardJobsExists = await prisma.$queryRaw`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'flashcard_jobs'
+      )
+    `
+    console.log('✅ flashcard_jobs exists:', flashcardJobsExists)
+    
+    // Now try to find jobs
     const pendingJobs = await prisma.flashcardJob.findMany({
       where: { status: 'PENDING' },
       orderBy: { createdAt: 'asc' },
-      take: 5 // Process in batches
+      take: 3
     })
-
-    // Process jobs in parallel
-    await Promise.all(pendingJobs.map(processJob))
     
+    console.log(`📋 Found ${pendingJobs.length} pending jobs`)
+    
+    // Process jobs...
   } catch (error) {
-    console.error('Polling error:', error)
+    console.error('Full error details:',error)
   }
 }
 
