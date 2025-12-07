@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "./src/lib/generated/prisma"
+  output   = "../lib/generated/prisma"
 }
 
 datasource db {
@@ -52,6 +52,7 @@ model FlashcardSet {
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   cards         Flashcard[]
   studySessions StudySession[]
+  flashcardJobs FlashcardJob[] // ✅ Add this reciprocal relation
 
   @@map("flashcard_sets")
 }
@@ -84,10 +85,15 @@ model FlashcardJob {
   status         JobStatus @default(PENDING)
   error          String?
 
-  flashcardSetId String?    // ✅ MUST EXIST
+  flashcardSetId String?
+  
+  // Relations
+  flashcardSet   FlashcardSet? @relation(fields: [flashcardSetId], references: [id])
+  user           User          @relation(fields: [userId], references: [id])
+
   createdAt      DateTime  @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  @@map("flashcard_jobs")
 }
 
 enum JobStatus {
