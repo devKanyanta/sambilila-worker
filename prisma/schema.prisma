@@ -1,0 +1,176 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  avatar    String?
+  userType  UserType @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  flashcardSets FlashcardSet[]
+  quizResults   QuizResult[]
+  studySessions StudySession[]
+  quizzes       Quiz[]
+  flashcardJobs FlashcardJob[]
+
+  @@map("users")
+}
+
+enum UserType {
+  STUDENT
+  TEACHER
+}
+
+model FlashcardSet {
+  id          String   @id @default(cuid())
+  title       String
+  subject     String
+  description String?
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cards         Flashcard[]
+  studySessions StudySession[]
+
+  @@map("flashcard_sets")
+}
+
+model Flashcard {
+  id        String   @id @default(cuid())
+  front     String
+  back      String
+  order     Int
+  createdAt DateTime @default(now())
+
+  // Relations
+  flashcardSetId String
+  flashcardSet   FlashcardSet @relation(fields: [flashcardSetId], references: [id], onDelete: Cascade)
+
+  @@map("flashcards")
+}
+
+model FlashcardJob {
+  id             String   @id @default(cuid())
+  userId         String
+
+  fileUrl        String?
+  text           String?
+
+  title          String
+  subject        String
+  description    String?
+
+  status         JobStatus @default(PENDING)
+  error          String?
+
+  flashcardSetId String?    // ✅ MUST EXIST
+  createdAt      DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+model Quiz {
+  id          String   @id @default(cuid())
+  title       String
+  subject     String
+  description String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questions QuizQuestion[]
+  results   QuizResult[]
+
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id            String       @id @default(cuid())
+  type          QuestionType
+  question      String
+  options       String[] // JSON array for multiple choice
+  correctAnswer String // JSON string to handle different types
+  order         Int
+  createdAt     DateTime     @default(now())
+
+  // Relations
+  quizId String
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@map("quiz_questions")
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
+model QuizResult {
+  id             String   @id @default(cuid())
+  score          Float
+  totalQuestions Int
+  answers        Json // Store user answers
+  completedAt    DateTime @default(now())
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizId String
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@map("quiz_results")
+}
+
+model StudySession {
+  id             String      @id @default(cuid())
+  duration       Int // in minutes
+  cardsStudied   Int
+  correctAnswers Int
+  sessionType    SessionType
+  startedAt      DateTime    @default(now())
+  endedAt        DateTime?
+
+  // Relations
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  flashcardSetId String?
+  flashcardSet   FlashcardSet? @relation(fields: [flashcardSetId], references: [id], onDelete: SetNull)
+
+  @@map("study_sessions")
+}
+
+enum SessionType {
+  FLASHCARDS
+  QUIZ
+  REVIEW
+}
