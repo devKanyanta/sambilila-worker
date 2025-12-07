@@ -1,8 +1,8 @@
 import "dotenv/config";
-import { prisma } from "./db";
-import { downloadFromDropbox } from "./dropbox";
-import { extractTextFromPDF } from "./pdf";
-import { generateFlashcardsFromText } from "./gemini";
+import { prisma } from "./db.js";
+import { downloadFromDropbox } from "./dropbox.js";
+import { extractTextFromPDF } from "./pdf.js";
+import { generateFlashcardsFromText } from "./gemini.js";
 
 async function runWorker() {
   console.log("🚀 Worker started");
