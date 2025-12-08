@@ -2,7 +2,6 @@ import "dotenv/config";
 import { prisma } from "./src/db.js";
 import { extractTextFromPDF } from "./src/pdf.js";
 import { generateFlashcardsFromText } from "./src/gemini.js";
-import fetch from "node-fetch";
 
 // Helper function to validate URLs
 function isValidUrl(string: string) {
@@ -45,7 +44,7 @@ async function executeWithRetry<T>(
 }
 
 async function processJob(job: any) {
-  console.log(`🔄 Processing job ${job.id}: ${job.title}`)
+  console.log(`🔄 Processing job ${job.id}: ${job.title} : ${job.fileUrl}`)
   
   try {
     // Update job status to PROCESSING with retry
@@ -68,29 +67,22 @@ async function processJob(job: any) {
         throw new Error(`Invalid file URL: ${job.fileUrl}`)
       }
       
-      console.log(`📥 Downloading file from: ${job.fileUrl.substring(0, 100)}...`)
-      
-      // Download PDF with timeout
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-      
       try {
-        const response = await fetch(job.fileUrl, { 
-          signal: controller.signal 
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Failed to download file: ${response.status} ${response.statusText}`);
+        if (job.fileUrl) {
+          // Validate URL
+          if (!isValidUrl(job.fileUrl)) {
+            throw new Error(`Invalid file URL: ${job.fileUrl}`);
+          }
+
+          console.log(`📄 Extracting PDF directly from URL: ${job.fileUrl}...`);
+
+          // ✅ Pass the URL directly to extractTextFromPDF (no download)
+          textContent = await extractTextFromPDF(job.fileUrl);
+
+          console.log(`📄 Extracted ${textContent.length} characters from PDF`);
         }
         
-        const arrayBuffer = await response.arrayBuffer();
-        clearTimeout(timeout);
-        
-        textContent = await extractTextFromPDF(new Uint8Array(arrayBuffer));
-        console.log(`📄 Extracted ${textContent.length} characters from PDF`);
-        
       } catch (fetchError: any) {
-        clearTimeout(timeout);
         if (fetchError.name === 'AbortError') {
           throw new Error('File download timeout (30 seconds)');
         }
