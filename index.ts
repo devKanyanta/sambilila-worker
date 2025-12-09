@@ -3,11 +3,15 @@ import { prisma } from "./src/db.js";
 import { extractTextFromPDF } from "./src/pdf.js";
 import { generateFlashcardsFromText } from "./src/gemini.js";
 
+// Define a constant for the maximum number of jobs to process concurrently.
+// This is the primary lever for controlling database connection load.
+const CONCURRENCY_LIMIT = 3; 
+
 // Helper function to validate URLs
 function isValidUrl(string: string) {
   try {
     const url = new URL(string);
-    // ⭐️ FIX 1: Allow 'r2:' protocol in addition to 'http:' and 'https:'
+    // FIX 1: Allow 'r2:' protocol in addition to 'http:' and 'https:'
     return url.protocol === 'http:' || url.protocol === 'https:' || url.protocol === 'r2:'; 
   } catch (_) {
     return false;
@@ -29,7 +33,7 @@ async function executeWithRetry<T>(
     } catch (error: any) {
       lastError = error;
       
-      // Check if it's a connection error
+      // Check if it's a connection error (Prisma P2037 or pool limit message)
       if (error.code === 'P2037' || error.message?.includes('too many connections')) {
         console.warn(`Connection error in ${operationName} (attempt ${i + 1}/${maxRetries}), waiting to retry...`);
         await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Exponential backoff
@@ -63,7 +67,7 @@ async function processJob(job: any) {
 
     // Process based on input type
     if (job.fileUrl) {
-      // ⭐️ FIX 2: Validate URL, now including r2://
+      // FIX 2: Validate URL, now including r2://
       if (!isValidUrl(job.fileUrl)) {
         throw new Error(`Invalid file URL: ${job.fileUrl}. Must be http, https, or r2 protocol.`);
       }
@@ -71,7 +75,7 @@ async function processJob(job: any) {
       try {
         console.log(`📄 Extracting PDF from path: ${job.fileUrl}...`);
 
-        // ⭐️ FIX 3: Directly call the updated extractTextFromPDF, which now handles R2 download
+        // FIX 3: Directly call the updated extractTextFromPDF, which now handles R2 download
         textContent = await extractTextFromPDF(job.fileUrl);
 
         console.log(`📄 Extracted ${textContent.length} characters from PDF`);
@@ -93,9 +97,9 @@ async function processJob(job: any) {
     }
 
     // Generate flashcards using AI
-    console.log(`🤖 Generating flashcards with AI...`);
+    console.log(`🤖 Generating flashcards with AI for job ${job.id}...`);
     const cards = await generateFlashcardsFromText(textContent);
-    console.log(`✅ Generated ${cards.length} flashcards`);
+    console.log(`✅ Generated ${cards.length} flashcards for job ${job.id}`);
 
     // Save flashcard set with retry
     const flashcardSet = await executeWithRetry(
@@ -156,12 +160,64 @@ async function processJob(job: any) {
   }
 }
 
-// ... rest of the file (pollJobs, safePollJobs, main, etc.) remains the same ...
+/**
+ * Executes a list of promise-returning functions with a concurrency limit.
+ * This is the mechanism that controls parallel processing.
+ * @param tasks An array of functions that return promises (e.g., () => processJob(job)).
+ * @param limit The maximum number of promises to run at the same time.
+ */
+async function runInBatches<T>(tasks: (() => Promise<T>)[], limit: number) {
+  const active: Promise<T>[] = [];
+  let index = 0;
+
+  // Function to process the next task
+  const runNext = async () => {
+    if (index >= tasks.length) {
+      return;
+    }
+
+    const task = tasks[index++];
+    const promise = task();
+    
+    // Add the promise to the active list
+    active.push(promise);
+    
+    // Wait for the current promise to settle
+    try {
+        await promise;
+    } catch (e) {
+        // Error already logged in processJob, safely continue.
+    }
+    
+    // Remove the settled promise from the active list
+    active.splice(active.indexOf(promise), 1);
+    
+    // Recursively check if there's more work to do
+    return runNext();
+  };
+
+  // Start the initial batch of promises up to the limit
+  const initialBatch = [];
+  for (let i = 0; i < limit && i < tasks.length; i++) {
+    initialBatch.push(runNext());
+  }
+
+  // Wait for the entire initial batch (and all subsequent tasks they trigger) to complete
+  await Promise.all(initialBatch);
+}
+
 
 async function pollJobs() {
+  if (shutdownRequested) {
+    return;
+  }
+  
   console.log('🔍 Polling for new jobs...')
   
   try {
+    // Fetch a batch larger than CONCURRENCY_LIMIT to keep the worker busy.
+    const BATCH_SIZE = CONCURRENCY_LIMIT * 2; 
+
     // Find pending jobs with retry
     const pendingJobs = await executeWithRetry(
       () => prisma.$queryRaw<any[]>`
@@ -177,7 +233,7 @@ async function pollJobs() {
         FROM flashcard_jobs 
         WHERE status = 'PENDING' 
         ORDER BY "createdAt" ASC 
-        LIMIT 2  -- Process only 2 at once for Clever Cloud
+        LIMIT ${BATCH_SIZE}
       `,
       3,
       'find pending jobs'
@@ -187,17 +243,13 @@ async function pollJobs() {
       return;
     }
 
-    console.log(`📋 Found ${pendingJobs.length} pending jobs`)
+    console.log(`📋 Found ${pendingJobs.length} pending jobs. Processing ${Math.min(pendingJobs.length, CONCURRENCY_LIMIT)} in parallel.`);
     
-    // Process jobs sequentially (not parallel) to reduce connection load
-    for (const job of pendingJobs) {
-      await processJob(job);
-      
-      // Small delay between jobs to reduce connection pressure
-      if (pendingJobs.length > 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-    }
+    // Create a list of functions that return a promise (thunks)
+    const jobPromises = pendingJobs.map(job => () => processJob(job));
+    
+    // Run the job processing with the set concurrency limit
+    await runInBatches(jobPromises, CONCURRENCY_LIMIT);
     
   } catch (error) {
     console.error('Polling error:', error)
