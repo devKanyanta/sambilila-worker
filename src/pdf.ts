@@ -1,122 +1,123 @@
 import { PDFParse } from 'pdf-parse';
-import axios from 'axios';
+// Removed axios as we are using the AWS SDK for R2 download
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+// Note: Depending on your specific worker environment (e.g., Node.js), 
+// you may need to explicitly import 'Readable' from 'stream' or 'node:stream'.
+import { Readable } from 'stream'; 
 
-export async function extractTextFromPDF(input: string | Buffer): Promise<string> {
+/* ---------------- Helper: Convert Stream to Buffer ---------------- */
+
+/**
+ * Converts a ReadableStream (from the S3 SDK response) into a Buffer.
+ * This is necessary because PDFParse requires a Buffer, but the SDK returns a stream.
+ * @param stream The stream containing the object body.
+ * @returns A Promise that resolves to a Buffer.
+ */
+function streamToBuffer(stream: Readable): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    stream.on('data', (chunk) => chunks.push(chunk));
+    stream.on('error', reject);
+    stream.on('end', () => resolve(Buffer.concat(chunks)));
+  });
+}
+
+/* ---------------- R2 Client Initialization (for Worker) ---------------- */
+
+if (
+    !process.env.R2_BUCKET_NAME ||
+    !process.env.R2_ACCESS_KEY_ID ||
+    !process.env.R2_SECRET_ACCESS_KEY ||
+    !process.env.R2_ENDPOINT_URL
+) {
+    // We throw an error here to prevent the worker from starting without credentials
+    throw new Error("Missing R2 worker credentials in environment variables.");
+}
+
+const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME;
+
+const r2ClientWorker = new S3Client({
+    region: "auto", // Required by Cloudflare R2
+    endpoint: process.env.R2_ENDPOINT_URL,
+    credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+    },
+});
+
+/* ================================================================
+                       extractTextFromPDF (R2 Logic)
+   ================================================================ */
+
+/**
+ * Extracts text content from a PDF file stored in Cloudflare R2.
+ * @param r2FilePath The internal R2 file path (e.g., 'r2://bucket-name/filename.pdf').
+ * @returns A promise that resolves to the extracted text content.
+ */
+export async function extractTextFromPDF(
+  r2FilePath: string
+): Promise<string> {
+  let pdfBuffer: Buffer | undefined;
+  let fileKey: string = '';
+  
   try {
-    let pdfBuffer: Buffer | undefined; // Explicitly define as undefined
-    
-    if (typeof input === 'string' && (input.startsWith('http://') || input.startsWith('https://'))) {
-      console.log(`📥 Fetching PDF from URL: ${input}`);
-      
-      let urlsToTry = [input];
-      
-      // --- 🔑 Dropbox URL Logic Enhancement ---
-      if (input.includes('dropbox.com')) {
-        const baseUrl = input.split('?')[0]; // Remove all original query parameters
-        
-        urlsToTry = [
-          input, // 1. Original URL (to capture any default redirect)
-          `${baseUrl}?raw=1`, // 2. Base URL + raw parameter
-        ];
-        
-        // The most reliable format for public content: replacing domain + adding ?raw=1
-        const directContentUrl = baseUrl.replace('www.dropbox.com', 'dl.dropboxusercontent.com') + '?raw=1';
-        urlsToTry.push(directContentUrl); // 3. Direct Content URL
-      }
-      
-      let lastError: Error | null = null;
-      
-      for (const url of urlsToTry) {
-        console.log(`🔄 Trying URL: ${url}`);
-        try {
-          
-          const response = await axios.get(url, {
-            responseType: 'arraybuffer',
-            timeout: 60000,
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-              'Accept': 'application/pdf, application/octet-stream, */*',
-              'Accept-Language': 'en-US,en;q=0.9',
-            },
-            maxRedirects: 5,
-            // ⭐️ CRUCIAL FIX: Allow 3xx redirect status codes (301, 302)
-            // Axios will automatically follow these redirects up to maxRedirects
-            validateStatus: (status) => status >= 200 && status < 400, // Accept 2xx (Success) and 3xx (Redirect)
-          });
-          
-          pdfBuffer = Buffer.from(response.data);
-          console.log(`✅ Successfully fetched from URL: ${url} (${pdfBuffer.length} bytes)`);
-          
-          // Check if it's a PDF
-          if (pdfBuffer.length > 4) {
-            const header = pdfBuffer.toString('utf8', 0, 10);
-            if (header.includes('%PDF')) {
-              console.log(`✅ Valid PDF header detected`);
-              break; // Success!
-            } else {
-              // This is what caught the HTML wrapper (<!DOCTYPE)
-              console.warn(`⚠️ Not a valid PDF (header: ${header.substring(0, 10)})`);
-              throw new Error('Not a valid PDF file content received. Got HTML or non-PDF data.');
-            }
-          }
-          
-        } catch (error: any) {
-          lastError = error;
-          console.log(`❌ URL failed: ${url} - ${error.message}`);
-          continue; 
-        }
-      }
-      
-      if (!pdfBuffer) {
-        throw lastError || new Error('All URL attempts failed to fetch a valid PDF');
-      }
-      
-    } else if (Buffer.isBuffer(input)) {
-      // ... (Buffer handling) ...
-      pdfBuffer = input;
-      console.log(`📄 Processing PDF buffer (${pdfBuffer.length} bytes)`);
-    } else {
-      throw new Error('Unsupported input type');
+    // 1. Validate and Parse R2 Key from the fileUrl
+    // The regex ensures the format is r2://BUCKET_NAME/FILE_KEY
+    const pathParts = r2FilePath.match(/^r2:\/\/[^/]+\/(.+)$/);
+    if (!pathParts || pathParts.length < 2) {
+        throw new Error(`Invalid R2 file path format. Expected r2://bucket/key, got: ${r2FilePath}`);
     }
+    fileKey = pathParts[1]; // Extracts only the file path/key after the bucket name
+
+    console.log(`🔑 Fetching PDF from R2 bucket: ${R2_BUCKET_NAME}, Key: ${fileKey}`);
+
+    // 2. Fetch the object from R2 using authorized S3 SDK
+    const getObjectCommand = new GetObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: fileKey,
+    });
+
+    // This command uses your secure credentials and is immune to IP bans/shared link issues
+    const response = await r2ClientWorker.send(getObjectCommand);
+
+    if (!response.Body) {
+        throw new Error('R2 response body was empty.');
+    }
+
+    // 3. Convert the Stream to a Buffer
+    pdfBuffer = await streamToBuffer(response.Body as Readable);
     
-    // ... (PDF parsing logic) ...
+    console.log(`✅ Successfully fetched PDF from R2 (${pdfBuffer.length} bytes)`);
+
+    // 4. PDF Parsing
     console.log('🔍 Parsing PDF content...');
-    // Ensure pdfBuffer is non-null before passing to PDFParse
     const parser = new PDFParse({ data: pdfBuffer });
     const result = await parser.getText();
     
     if (!result.text || result.text.trim().length === 0) {
       console.warn('⚠️ No text content extracted from PDF');
-      // Try alternative parsing method (if needed)
     }
     
     console.log(`✅ Extracted ${result.text.length} characters from PDF`);
     return result.text;
     
   } catch (err: any) {
-    // ... (Error handling logic) ...
-    console.error('PDF parse error details:', {
+    // 5. Error Handling
+    console.error('PDF fetch or parse error details:', {
       message: err.message,
-      url: typeof input === 'string' ? input : undefined,
+      fileKey: fileKey,
       stack: err.stack
     });
     
-    if (err.message.includes('timeout') || err.code === 'ECONNABORTED') {
-      throw new Error('PDF download timeout (60 seconds)');
+    // Catch common S3/R2 errors
+    if (err.name === 'NoSuchKey') {
+      throw new Error(`R2 File not found or deleted: ${fileKey}`);
     }
     
-    if (err.message.includes('ENOTFOUND') || err.code === 'ENOTFOUND') {
-      throw new Error('Cannot resolve the URL. Please check the PDF URL is valid.');
+    if (err.name === 'Forbidden') {
+      throw new Error('R2 Access Denied. Check worker credentials and bucket permissions.');
     }
     
-    if (err.response?.status === 403 || err.response?.status === 404) {
-      throw new Error(`PDF not accessible (HTTP ${err.response.status}). The file may be private or deleted.`);
-    }
-    
-    if (err.message.includes('Not a valid PDF')) {
-      throw new Error('The downloaded file is not a valid PDF.');
-    }
-    
-    throw new Error(`Failed to process PDF: ${err.message}`);
+    throw new Error(`Failed to process PDF from R2: ${err.message}`);
   }
 }

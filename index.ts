@@ -7,7 +7,8 @@ import { generateFlashcardsFromText } from "./src/gemini.js";
 function isValidUrl(string: string) {
   try {
     const url = new URL(string);
-    return url.protocol === 'http:' || url.protocol === 'https:';
+    // ⭐️ FIX 1: Allow 'r2:' protocol in addition to 'http:' and 'https:'
+    return url.protocol === 'http:' || url.protocol === 'https:' || url.protocol === 'r2:'; 
   } catch (_) {
     return false;
   }
@@ -62,25 +63,18 @@ async function processJob(job: any) {
 
     // Process based on input type
     if (job.fileUrl) {
-      // Validate URL
+      // ⭐️ FIX 2: Validate URL, now including r2://
       if (!isValidUrl(job.fileUrl)) {
-        throw new Error(`Invalid file URL: ${job.fileUrl}`)
+        throw new Error(`Invalid file URL: ${job.fileUrl}. Must be http, https, or r2 protocol.`);
       }
       
       try {
-        if (job.fileUrl) {
-          // Validate URL
-          if (!isValidUrl(job.fileUrl)) {
-            throw new Error(`Invalid file URL: ${job.fileUrl}`);
-          }
+        console.log(`📄 Extracting PDF from path: ${job.fileUrl}...`);
 
-          console.log(`📄 Extracting PDF directly from URL: ${job.fileUrl}...`);
+        // ⭐️ FIX 3: Directly call the updated extractTextFromPDF, which now handles R2 download
+        textContent = await extractTextFromPDF(job.fileUrl);
 
-          // ✅ Pass the URL directly to extractTextFromPDF (no download)
-          textContent = await extractTextFromPDF(job.fileUrl);
-
-          console.log(`📄 Extracted ${textContent.length} characters from PDF`);
-        }
+        console.log(`📄 Extracted ${textContent.length} characters from PDF`);
         
       } catch (fetchError: any) {
         if (fetchError.name === 'AbortError') {
@@ -161,6 +155,8 @@ async function processJob(job: any) {
     }
   }
 }
+
+// ... rest of the file (pollJobs, safePollJobs, main, etc.) remains the same ...
 
 async function pollJobs() {
   console.log('🔍 Polling for new jobs...')
