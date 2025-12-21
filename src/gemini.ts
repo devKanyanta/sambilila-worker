@@ -44,6 +44,19 @@ ${text}
   }
 
   try {
+    // Sanitize the JSON string by escaping control characters
+    // This handles cases where Gemini includes literal control characters
+    raw = raw.replace(/[\x00-\x1F\x7F]/g, (char) => {
+      const escapeMap: Record<string, string> = {
+        '\b': '\\b',
+        '\f': '\\f',
+        '\n': '\\n',
+        '\r': '\\r',
+        '\t': '\\t'
+      };
+      return escapeMap[char] || `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`;
+    });
+
     return JSON.parse(raw);
   } catch (error) {
     console.error("Failed to parse JSON:", raw.substring(0, 500));
