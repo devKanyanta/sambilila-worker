@@ -1,65 +1,57 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType, Schema } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+// 1. Define the schema exactly as shown in the docs, but with TypeScript safety
+const flashcardSchema: Schema = {
+  description: "A list of flashcards extracted from text",
+  type: SchemaType.ARRAY,
+  items: {
+    type: SchemaType.OBJECT,
+    properties: {
+      front: {
+        type: SchemaType.STRING,
+        description: "The question, term, or concept on the front of the card.",
+      },
+      back: {
+        type: SchemaType.STRING,
+        description: "The answer, definition, or explanation on the back of the card.",
+      },
+    },
+    required: ["front", "back"],
+  },
+};
+
 export async function generateFlashcardsFromText(text: string) {
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  // 2. Initialize the model with the schema in generationConfig
+  // Note: Using 'gemini-1.5-flash' or 'gemini-2.0-flash' as per official docs
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: flashcardSchema,
+    },
+  });
 
   const prompt = `
-You are an API that outputs ONLY raw JSON.
+    Extract flashcards from the following text. 
+    Focus on key concepts and instructional material.
+    Ignore metadata like page numbers or headers.
 
-TASK:
-Convert the following text into flashcards.
-
-RULES:
-- Output valid JSON ONLY
-- No markdown, no code blocks, no comments, no explanations
-- No backticks or formatting
-- Must be exactly an array
-- **IGNORE all metadata, including authors, dates, page numbers, headers, and footers. Focus ONLY on the instructional course material.**
-
-FORMAT:
-[
-  {
-    "front": "question",
-    "back": "answer"
-  }
-]
-
-TEXT:
-
-${text}
-`;
-
-  const result = await model.generateContent(prompt);
-  let raw = result.response.text();
-
-  // Remove markdown code blocks
-  raw = raw.replace(/```json\n?|```\n?/g, "").trim();
-
-  // Extract JSON array if it's wrapped in other text
-  const jsonMatch = raw.match(/\[[\s\S]*\]/);
-  if (jsonMatch) {
-    raw = jsonMatch[0];
-  }
+    TEXT:
+    ${text}
+  `;
 
   try {
-    // Sanitize the JSON string by escaping control characters
-    // This handles cases where Gemini includes literal control characters
-    raw = raw.replace(/[\x00-\x1F\x7F]/g, (char) => {
-      const escapeMap: Record<string, string> = {
-        '\b': '\\b',
-        '\f': '\\f',
-        '\n': '\\n',
-        '\r': '\\r',
-        '\t': '\\t'
-      };
-      return escapeMap[char] || `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`;
-    });
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    const jsonText = response.text();
 
-    return JSON.parse(raw);
+    // 3. With responseSchema, the AI is guaranteed to return valid, escaped JSON.
+    // No regex or backtick stripping is needed.
+    return JSON.parse(jsonText);
   } catch (error) {
-    console.error("Failed to parse JSON:", raw);
-    throw new Error(`Invalid JSON ${raw} from Gemini: ${error instanceof Error ? error.message : String(error)}`);
+    console.error("Failed to generate or parse flashcards:", error);
+    throw error;
   }
 }
