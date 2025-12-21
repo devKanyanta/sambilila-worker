@@ -58,6 +58,7 @@ export const ModelName = {
   Quiz: 'Quiz',
   QuizQuestion: 'QuizQuestion',
   QuizResult: 'QuizResult',
+  QuizJob: 'QuizJob',
   StudySession: 'StudySession'
 } as const
 
@@ -171,6 +172,24 @@ export const QuizResultScalarFieldEnum = {
 } as const
 
 export type QuizResultScalarFieldEnum = (typeof QuizResultScalarFieldEnum)[keyof typeof QuizResultScalarFieldEnum]
+
+
+export const QuizJobScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  fileUrl: 'fileUrl',
+  text: 'text',
+  title: 'title',
+  difficulty: 'difficulty',
+  numberOfQuestions: 'numberOfQuestions',
+  questionTypes: 'questionTypes',
+  status: 'status',
+  error: 'error',
+  quizId: 'quizId',
+  createdAt: 'createdAt'
+} as const
+
+export type QuizJobScalarFieldEnum = (typeof QuizJobScalarFieldEnum)[keyof typeof QuizJobScalarFieldEnum]
 
 
 export const StudySessionScalarFieldEnum = {

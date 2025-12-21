@@ -17,6 +17,15 @@ export const UserType = {
 export type UserType = (typeof UserType)[keyof typeof UserType]
 
 
+export const QuestionType = {
+  MULTIPLE_CHOICE: 'MULTIPLE_CHOICE',
+  TRUE_FALSE: 'TRUE_FALSE',
+  SHORT_ANSWER: 'SHORT_ANSWER'
+} as const
+
+export type QuestionType = (typeof QuestionType)[keyof typeof QuestionType]
+
+
 export const JobStatus = {
   PENDING: 'PENDING',
   PROCESSING: 'PROCESSING',
@@ -25,15 +34,6 @@ export const JobStatus = {
 } as const
 
 export type JobStatus = (typeof JobStatus)[keyof typeof JobStatus]
-
-
-export const QuestionType = {
-  MULTIPLE_CHOICE: 'MULTIPLE_CHOICE',
-  TRUE_FALSE: 'TRUE_FALSE',
-  SHORT_ANSWER: 'SHORT_ANSWER'
-} as const
-
-export type QuestionType = (typeof QuestionType)[keyof typeof QuestionType]
 
 
 export const SessionType = {

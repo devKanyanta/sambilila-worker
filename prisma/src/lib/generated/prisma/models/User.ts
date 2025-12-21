@@ -211,6 +211,7 @@ export type UserWhereInput = {
   studySessions?: Prisma.StudySessionListRelationFilter
   quizzes?: Prisma.QuizListRelationFilter
   flashcardJobs?: Prisma.FlashcardJobListRelationFilter
+  quizJobs?: Prisma.QuizJobListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -227,6 +228,7 @@ export type UserOrderByWithRelationInput = {
   studySessions?: Prisma.StudySessionOrderByRelationAggregateInput
   quizzes?: Prisma.QuizOrderByRelationAggregateInput
   flashcardJobs?: Prisma.FlashcardJobOrderByRelationAggregateInput
+  quizJobs?: Prisma.QuizJobOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -246,6 +248,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   studySessions?: Prisma.StudySessionListRelationFilter
   quizzes?: Prisma.QuizListRelationFilter
   flashcardJobs?: Prisma.FlashcardJobListRelationFilter
+  quizJobs?: Prisma.QuizJobListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -290,6 +293,7 @@ export type UserCreateInput = {
   studySessions?: Prisma.StudySessionCreateNestedManyWithoutUserInput
   quizzes?: Prisma.QuizCreateNestedManyWithoutUserInput
   flashcardJobs?: Prisma.FlashcardJobCreateNestedManyWithoutUserInput
+  quizJobs?: Prisma.QuizJobCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -306,6 +310,7 @@ export type UserUncheckedCreateInput = {
   studySessions?: Prisma.StudySessionUncheckedCreateNestedManyWithoutUserInput
   quizzes?: Prisma.QuizUncheckedCreateNestedManyWithoutUserInput
   flashcardJobs?: Prisma.FlashcardJobUncheckedCreateNestedManyWithoutUserInput
+  quizJobs?: Prisma.QuizJobUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -322,6 +327,7 @@ export type UserUpdateInput = {
   studySessions?: Prisma.StudySessionUpdateManyWithoutUserNestedInput
   quizzes?: Prisma.QuizUpdateManyWithoutUserNestedInput
   flashcardJobs?: Prisma.FlashcardJobUpdateManyWithoutUserNestedInput
+  quizJobs?: Prisma.QuizJobUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -338,6 +344,7 @@ export type UserUncheckedUpdateInput = {
   studySessions?: Prisma.StudySessionUncheckedUpdateManyWithoutUserNestedInput
   quizzes?: Prisma.QuizUncheckedUpdateManyWithoutUserNestedInput
   flashcardJobs?: Prisma.FlashcardJobUncheckedUpdateManyWithoutUserNestedInput
+  quizJobs?: Prisma.QuizJobUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -483,6 +490,20 @@ export type UserUpdateOneRequiredWithoutQuizResultsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutQuizResultsInput, Prisma.UserUpdateWithoutQuizResultsInput>, Prisma.UserUncheckedUpdateWithoutQuizResultsInput>
 }
 
+export type UserCreateNestedOneWithoutQuizJobsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutQuizJobsInput, Prisma.UserUncheckedCreateWithoutQuizJobsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutQuizJobsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutQuizJobsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutQuizJobsInput, Prisma.UserUncheckedCreateWithoutQuizJobsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutQuizJobsInput
+  upsert?: Prisma.UserUpsertWithoutQuizJobsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutQuizJobsInput, Prisma.UserUpdateWithoutQuizJobsInput>, Prisma.UserUncheckedUpdateWithoutQuizJobsInput>
+}
+
 export type UserCreateNestedOneWithoutStudySessionsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutStudySessionsInput, Prisma.UserUncheckedCreateWithoutStudySessionsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutStudySessionsInput
@@ -510,6 +531,7 @@ export type UserCreateWithoutFlashcardSetsInput = {
   studySessions?: Prisma.StudySessionCreateNestedManyWithoutUserInput
   quizzes?: Prisma.QuizCreateNestedManyWithoutUserInput
   flashcardJobs?: Prisma.FlashcardJobCreateNestedManyWithoutUserInput
+  quizJobs?: Prisma.QuizJobCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFlashcardSetsInput = {
@@ -525,6 +547,7 @@ export type UserUncheckedCreateWithoutFlashcardSetsInput = {
   studySessions?: Prisma.StudySessionUncheckedCreateNestedManyWithoutUserInput
   quizzes?: Prisma.QuizUncheckedCreateNestedManyWithoutUserInput
   flashcardJobs?: Prisma.FlashcardJobUncheckedCreateNestedManyWithoutUserInput
+  quizJobs?: Prisma.QuizJobUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFlashcardSetsInput = {
@@ -556,6 +579,7 @@ export type UserUpdateWithoutFlashcardSetsInput = {
   studySessions?: Prisma.StudySessionUpdateManyWithoutUserNestedInput
   quizzes?: Prisma.QuizUpdateManyWithoutUserNestedInput
   flashcardJobs?: Prisma.FlashcardJobUpdateManyWithoutUserNestedInput
+  quizJobs?: Prisma.QuizJobUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFlashcardSetsInput = {
@@ -571,6 +595,7 @@ export type UserUncheckedUpdateWithoutFlashcardSetsInput = {
   studySessions?: Prisma.StudySessionUncheckedUpdateManyWithoutUserNestedInput
   quizzes?: Prisma.QuizUncheckedUpdateManyWithoutUserNestedInput
   flashcardJobs?: Prisma.FlashcardJobUncheckedUpdateManyWithoutUserNestedInput
+  quizJobs?: Prisma.QuizJobUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutFlashcardJobsInput = {
@@ -586,6 +611,7 @@ export type UserCreateWithoutFlashcardJobsInput = {
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
   studySessions?: Prisma.StudySessionCreateNestedManyWithoutUserInput
   quizzes?: Prisma.QuizCreateNestedManyWithoutUserInput
+  quizJobs?: Prisma.QuizJobCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFlashcardJobsInput = {
@@ -601,6 +627,7 @@ export type UserUncheckedCreateWithoutFlashcardJobsInput = {
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
   studySessions?: Prisma.StudySessionUncheckedCreateNestedManyWithoutUserInput
   quizzes?: Prisma.QuizUncheckedCreateNestedManyWithoutUserInput
+  quizJobs?: Prisma.QuizJobUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFlashcardJobsInput = {
@@ -632,6 +659,7 @@ export type UserUpdateWithoutFlashcardJobsInput = {
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
   studySessions?: Prisma.StudySessionUpdateManyWithoutUserNestedInput
   quizzes?: Prisma.QuizUpdateManyWithoutUserNestedInput
+  quizJobs?: Prisma.QuizJobUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFlashcardJobsInput = {
@@ -647,6 +675,7 @@ export type UserUncheckedUpdateWithoutFlashcardJobsInput = {
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
   studySessions?: Prisma.StudySessionUncheckedUpdateManyWithoutUserNestedInput
   quizzes?: Prisma.QuizUncheckedUpdateManyWithoutUserNestedInput
+  quizJobs?: Prisma.QuizJobUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutQuizzesInput = {
@@ -662,6 +691,7 @@ export type UserCreateWithoutQuizzesInput = {
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
   studySessions?: Prisma.StudySessionCreateNestedManyWithoutUserInput
   flashcardJobs?: Prisma.FlashcardJobCreateNestedManyWithoutUserInput
+  quizJobs?: Prisma.QuizJobCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutQuizzesInput = {
@@ -677,6 +707,7 @@ export type UserUncheckedCreateWithoutQuizzesInput = {
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
   studySessions?: Prisma.StudySessionUncheckedCreateNestedManyWithoutUserInput
   flashcardJobs?: Prisma.FlashcardJobUncheckedCreateNestedManyWithoutUserInput
+  quizJobs?: Prisma.QuizJobUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutQuizzesInput = {
@@ -708,6 +739,7 @@ export type UserUpdateWithoutQuizzesInput = {
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
   studySessions?: Prisma.StudySessionUpdateManyWithoutUserNestedInput
   flashcardJobs?: Prisma.FlashcardJobUpdateManyWithoutUserNestedInput
+  quizJobs?: Prisma.QuizJobUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutQuizzesInput = {
@@ -723,6 +755,7 @@ export type UserUncheckedUpdateWithoutQuizzesInput = {
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
   studySessions?: Prisma.StudySessionUncheckedUpdateManyWithoutUserNestedInput
   flashcardJobs?: Prisma.FlashcardJobUncheckedUpdateManyWithoutUserNestedInput
+  quizJobs?: Prisma.QuizJobUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutQuizResultsInput = {
@@ -738,6 +771,7 @@ export type UserCreateWithoutQuizResultsInput = {
   studySessions?: Prisma.StudySessionCreateNestedManyWithoutUserInput
   quizzes?: Prisma.QuizCreateNestedManyWithoutUserInput
   flashcardJobs?: Prisma.FlashcardJobCreateNestedManyWithoutUserInput
+  quizJobs?: Prisma.QuizJobCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutQuizResultsInput = {
@@ -753,6 +787,7 @@ export type UserUncheckedCreateWithoutQuizResultsInput = {
   studySessions?: Prisma.StudySessionUncheckedCreateNestedManyWithoutUserInput
   quizzes?: Prisma.QuizUncheckedCreateNestedManyWithoutUserInput
   flashcardJobs?: Prisma.FlashcardJobUncheckedCreateNestedManyWithoutUserInput
+  quizJobs?: Prisma.QuizJobUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutQuizResultsInput = {
@@ -784,6 +819,7 @@ export type UserUpdateWithoutQuizResultsInput = {
   studySessions?: Prisma.StudySessionUpdateManyWithoutUserNestedInput
   quizzes?: Prisma.QuizUpdateManyWithoutUserNestedInput
   flashcardJobs?: Prisma.FlashcardJobUpdateManyWithoutUserNestedInput
+  quizJobs?: Prisma.QuizJobUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutQuizResultsInput = {
@@ -796,6 +832,87 @@ export type UserUncheckedUpdateWithoutQuizResultsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   flashcardSets?: Prisma.FlashcardSetUncheckedUpdateManyWithoutUserNestedInput
+  studySessions?: Prisma.StudySessionUncheckedUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizUncheckedUpdateManyWithoutUserNestedInput
+  flashcardJobs?: Prisma.FlashcardJobUncheckedUpdateManyWithoutUserNestedInput
+  quizJobs?: Prisma.QuizJobUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutQuizJobsInput = {
+  id?: string
+  email: string
+  password: string
+  name: string
+  avatar?: string | null
+  userType?: $Enums.UserType
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  flashcardSets?: Prisma.FlashcardSetCreateNestedManyWithoutUserInput
+  quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
+  studySessions?: Prisma.StudySessionCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizCreateNestedManyWithoutUserInput
+  flashcardJobs?: Prisma.FlashcardJobCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutQuizJobsInput = {
+  id?: string
+  email: string
+  password: string
+  name: string
+  avatar?: string | null
+  userType?: $Enums.UserType
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  flashcardSets?: Prisma.FlashcardSetUncheckedCreateNestedManyWithoutUserInput
+  quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
+  studySessions?: Prisma.StudySessionUncheckedCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizUncheckedCreateNestedManyWithoutUserInput
+  flashcardJobs?: Prisma.FlashcardJobUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutQuizJobsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutQuizJobsInput, Prisma.UserUncheckedCreateWithoutQuizJobsInput>
+}
+
+export type UserUpsertWithoutQuizJobsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutQuizJobsInput, Prisma.UserUncheckedUpdateWithoutQuizJobsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutQuizJobsInput, Prisma.UserUncheckedCreateWithoutQuizJobsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutQuizJobsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutQuizJobsInput, Prisma.UserUncheckedUpdateWithoutQuizJobsInput>
+}
+
+export type UserUpdateWithoutQuizJobsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userType?: Prisma.EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  flashcardSets?: Prisma.FlashcardSetUpdateManyWithoutUserNestedInput
+  quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
+  studySessions?: Prisma.StudySessionUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizUpdateManyWithoutUserNestedInput
+  flashcardJobs?: Prisma.FlashcardJobUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutQuizJobsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userType?: Prisma.EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  flashcardSets?: Prisma.FlashcardSetUncheckedUpdateManyWithoutUserNestedInput
+  quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
   studySessions?: Prisma.StudySessionUncheckedUpdateManyWithoutUserNestedInput
   quizzes?: Prisma.QuizUncheckedUpdateManyWithoutUserNestedInput
   flashcardJobs?: Prisma.FlashcardJobUncheckedUpdateManyWithoutUserNestedInput
@@ -814,6 +931,7 @@ export type UserCreateWithoutStudySessionsInput = {
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
   quizzes?: Prisma.QuizCreateNestedManyWithoutUserInput
   flashcardJobs?: Prisma.FlashcardJobCreateNestedManyWithoutUserInput
+  quizJobs?: Prisma.QuizJobCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStudySessionsInput = {
@@ -829,6 +947,7 @@ export type UserUncheckedCreateWithoutStudySessionsInput = {
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
   quizzes?: Prisma.QuizUncheckedCreateNestedManyWithoutUserInput
   flashcardJobs?: Prisma.FlashcardJobUncheckedCreateNestedManyWithoutUserInput
+  quizJobs?: Prisma.QuizJobUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStudySessionsInput = {
@@ -860,6 +979,7 @@ export type UserUpdateWithoutStudySessionsInput = {
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
   quizzes?: Prisma.QuizUpdateManyWithoutUserNestedInput
   flashcardJobs?: Prisma.FlashcardJobUpdateManyWithoutUserNestedInput
+  quizJobs?: Prisma.QuizJobUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudySessionsInput = {
@@ -875,6 +995,7 @@ export type UserUncheckedUpdateWithoutStudySessionsInput = {
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
   quizzes?: Prisma.QuizUncheckedUpdateManyWithoutUserNestedInput
   flashcardJobs?: Prisma.FlashcardJobUncheckedUpdateManyWithoutUserNestedInput
+  quizJobs?: Prisma.QuizJobUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -888,6 +1009,7 @@ export type UserCountOutputType = {
   studySessions: number
   quizzes: number
   flashcardJobs: number
+  quizJobs: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -896,6 +1018,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   studySessions?: boolean | UserCountOutputTypeCountStudySessionsArgs
   quizzes?: boolean | UserCountOutputTypeCountQuizzesArgs
   flashcardJobs?: boolean | UserCountOutputTypeCountFlashcardJobsArgs
+  quizJobs?: boolean | UserCountOutputTypeCountQuizJobsArgs
 }
 
 /**
@@ -943,6 +1066,13 @@ export type UserCountOutputTypeCountFlashcardJobsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.FlashcardJobWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountQuizJobsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.QuizJobWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -958,6 +1088,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   studySessions?: boolean | Prisma.User$studySessionsArgs<ExtArgs>
   quizzes?: boolean | Prisma.User$quizzesArgs<ExtArgs>
   flashcardJobs?: boolean | Prisma.User$flashcardJobsArgs<ExtArgs>
+  quizJobs?: boolean | Prisma.User$quizJobsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1001,6 +1132,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   studySessions?: boolean | Prisma.User$studySessionsArgs<ExtArgs>
   quizzes?: boolean | Prisma.User$quizzesArgs<ExtArgs>
   flashcardJobs?: boolean | Prisma.User$flashcardJobsArgs<ExtArgs>
+  quizJobs?: boolean | Prisma.User$quizJobsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1014,6 +1146,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     studySessions: Prisma.$StudySessionPayload<ExtArgs>[]
     quizzes: Prisma.$QuizPayload<ExtArgs>[]
     flashcardJobs: Prisma.$FlashcardJobPayload<ExtArgs>[]
+    quizJobs: Prisma.$QuizJobPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1423,6 +1556,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   studySessions<T extends Prisma.User$studySessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studySessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudySessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   quizzes<T extends Prisma.User$quizzesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$quizzesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuizPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   flashcardJobs<T extends Prisma.User$flashcardJobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$flashcardJobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FlashcardJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  quizJobs<T extends Prisma.User$quizJobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$quizJobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuizJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1965,6 +2099,30 @@ export type User$flashcardJobsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.FlashcardJobScalarFieldEnum | Prisma.FlashcardJobScalarFieldEnum[]
+}
+
+/**
+ * User.quizJobs
+ */
+export type User$quizJobsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the QuizJob
+   */
+  select?: Prisma.QuizJobSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the QuizJob
+   */
+  omit?: Prisma.QuizJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuizJobInclude<ExtArgs> | null
+  where?: Prisma.QuizJobWhereInput
+  orderBy?: Prisma.QuizJobOrderByWithRelationInput | Prisma.QuizJobOrderByWithRelationInput[]
+  cursor?: Prisma.QuizJobWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.QuizJobScalarFieldEnum | Prisma.QuizJobScalarFieldEnum[]
 }
 
 /**

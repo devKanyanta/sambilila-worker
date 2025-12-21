@@ -29,6 +29,7 @@ model User {
   studySessions StudySession[]
   quizzes       Quiz[]
   flashcardJobs FlashcardJob[]
+  quizJobs      QuizJob[] // Added missing relation
 
   @@map("users")
 }
@@ -52,8 +53,9 @@ model FlashcardSet {
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   cards         Flashcard[]
   studySessions StudySession[]
-  flashcardJobs FlashcardJob[] // ✅ Add this reciprocal relation
+  flashcardJobs FlashcardJob[] 
 
+  @@index([userId])
   @@map("flashcard_sets")
 }
 
@@ -68,39 +70,35 @@ model Flashcard {
   flashcardSetId String
   flashcardSet   FlashcardSet @relation(fields: [flashcardSetId], references: [id], onDelete: Cascade)
 
+  @@index([flashcardSetId])
   @@map("flashcards")
 }
 
 model FlashcardJob {
-  id             String   @id @default(cuid())
-  userId         String
+  id      String @id @default(cuid())
+  userId  String
 
-  fileUrl        String?
-  text           String?
+  fileUrl String?
+  text    String?
 
-  title          String
-  subject        String
-  description    String?
+  title       String
+  subject     String
+  description String?
 
-  status         JobStatus @default(PENDING)
-  error          String?
+  status JobStatus @default(PENDING)
+  error  String?
 
   flashcardSetId String?
-  
+
   // Relations
-  flashcardSet   FlashcardSet? @relation(fields: [flashcardSetId], references: [id])
-  user           User          @relation(fields: [userId], references: [id])
+  flashcardSet FlashcardSet? @relation(fields: [flashcardSetId], references: [id])
+  user         User          @relation(fields: [userId], references: [id])
 
-  createdAt      DateTime  @default(now())
+  createdAt DateTime @default(now())
 
+  @@index([userId])
+  @@index([flashcardSetId])
   @@map("flashcard_jobs")
-}
-
-enum JobStatus {
-  PENDING
-  PROCESSING
-  DONE
-  FAILED
 }
 
 model Quiz {
@@ -115,7 +113,9 @@ model Quiz {
   user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   questions QuizQuestion[]
   results   QuizResult[]
+  quizJobs  QuizJob[] // Added missing relation
 
+  @@index([userId])
   @@map("quizzes")
 }
 
@@ -132,6 +132,7 @@ model QuizQuestion {
   quizId String
   quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
+  @@index([quizId])
   @@map("quiz_questions")
 }
 
@@ -154,7 +155,44 @@ model QuizResult {
   quizId String
   quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([quizId])
   @@map("quiz_results")
+}
+
+model QuizJob {
+  id     String @id @default(cuid())
+  userId String
+
+  fileUrl String?
+  text    String?
+
+  title             String
+  difficulty        String
+  numberOfQuestions String
+  questionTypes     String
+
+  status JobStatus @default(PENDING)
+  error  String?
+
+  quizId String?
+
+  // Relations
+  quiz Quiz? @relation(fields: [quizId], references: [id])
+  user User  @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([quizId])
+  @@map("quiz_job")
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
 }
 
 model StudySession {
@@ -172,6 +210,8 @@ model StudySession {
   flashcardSetId String?
   flashcardSet   FlashcardSet? @relation(fields: [flashcardSetId], references: [id], onDelete: SetNull)
 
+  @@index([userId])
+  @@index([flashcardSetId])
   @@map("study_sessions")
 }
 

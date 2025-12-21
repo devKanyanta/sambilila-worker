@@ -391,6 +391,7 @@ export const ModelName = {
   Quiz: 'Quiz',
   QuizQuestion: 'QuizQuestion',
   QuizResult: 'QuizResult',
+  QuizJob: 'QuizJob',
   StudySession: 'StudySession'
 } as const
 
@@ -407,7 +408,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "flashcardSet" | "flashcard" | "flashcardJob" | "quiz" | "quizQuestion" | "quizResult" | "studySession"
+    modelProps: "user" | "flashcardSet" | "flashcard" | "flashcardJob" | "quiz" | "quizQuestion" | "quizResult" | "quizJob" | "studySession"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -929,6 +930,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    QuizJob: {
+      payload: Prisma.$QuizJobPayload<ExtArgs>
+      fields: Prisma.QuizJobFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.QuizJobFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuizJobPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.QuizJobFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuizJobPayload>
+        }
+        findFirst: {
+          args: Prisma.QuizJobFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuizJobPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.QuizJobFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuizJobPayload>
+        }
+        findMany: {
+          args: Prisma.QuizJobFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuizJobPayload>[]
+        }
+        create: {
+          args: Prisma.QuizJobCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuizJobPayload>
+        }
+        createMany: {
+          args: Prisma.QuizJobCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.QuizJobCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuizJobPayload>[]
+        }
+        delete: {
+          args: Prisma.QuizJobDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuizJobPayload>
+        }
+        update: {
+          args: Prisma.QuizJobUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuizJobPayload>
+        }
+        deleteMany: {
+          args: Prisma.QuizJobDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.QuizJobUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.QuizJobUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuizJobPayload>[]
+        }
+        upsert: {
+          args: Prisma.QuizJobUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuizJobPayload>
+        }
+        aggregate: {
+          args: Prisma.QuizJobAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateQuizJob>
+        }
+        groupBy: {
+          args: Prisma.QuizJobGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QuizJobGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.QuizJobCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QuizJobCountAggregateOutputType> | number
+        }
+      }
+    }
     StudySession: {
       payload: Prisma.$StudySessionPayload<ExtArgs>
       fields: Prisma.StudySessionFieldRefs
@@ -1136,6 +1211,24 @@ export const QuizResultScalarFieldEnum = {
 } as const
 
 export type QuizResultScalarFieldEnum = (typeof QuizResultScalarFieldEnum)[keyof typeof QuizResultScalarFieldEnum]
+
+
+export const QuizJobScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  fileUrl: 'fileUrl',
+  text: 'text',
+  title: 'title',
+  difficulty: 'difficulty',
+  numberOfQuestions: 'numberOfQuestions',
+  questionTypes: 'questionTypes',
+  status: 'status',
+  error: 'error',
+  quizId: 'quizId',
+  createdAt: 'createdAt'
+} as const
+
+export type QuizJobScalarFieldEnum = (typeof QuizJobScalarFieldEnum)[keyof typeof QuizJobScalarFieldEnum]
 
 
 export const StudySessionScalarFieldEnum = {
@@ -1433,6 +1526,7 @@ export type GlobalOmitConfig = {
   quiz?: Prisma.QuizOmit
   quizQuestion?: Prisma.QuizQuestionOmit
   quizResult?: Prisma.QuizResultOmit
+  quizJob?: Prisma.QuizJobOmit
   studySession?: Prisma.StudySessionOmit
 }
 

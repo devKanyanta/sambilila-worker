@@ -22,6 +22,37 @@ const flashcardSchema: Schema = {
   },
 };
 
+const quizSchema: Schema = {
+  type: SchemaType.OBJECT,
+  description: "A comprehensive quiz based on provided text",
+  properties: {
+    title: { type: SchemaType.STRING },
+    subject: { type: SchemaType.STRING },
+    description: { type: SchemaType.STRING },
+    questions: {
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.OBJECT,
+        properties: {
+          type: { 
+            type: SchemaType.STRING, 
+            description: "The type of question",
+            enum: ["MULTIPLE_CHOICE", "TRUE_FALSE", "SHORT_ANSWER"] 
+          } as Schema, 
+          question: { type: SchemaType.STRING },
+          options: { 
+            type: SchemaType.ARRAY, 
+            items: { type: SchemaType.STRING }
+          },
+          correctAnswer: { type: SchemaType.STRING },
+        },
+        required: ["type", "question", "correctAnswer"],
+      },
+    },
+  },
+  required: ["title", "subject", "description", "questions"],
+};
+
 export async function generateFlashcardsFromText(text: string) {
   // 2. Initialize the model with the schema in generationConfig
   // Note: Using 'gemini-1.5-flash' or 'gemini-2.0-flash' as per official docs
@@ -41,6 +72,41 @@ export async function generateFlashcardsFromText(text: string) {
     TEXT:
     ${text}
   `;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    const jsonText = response.text();
+
+    // 3. With responseSchema, the AI is guaranteed to return valid, escaped JSON.
+    // No regex or backtick stripping is needed.
+    return JSON.parse(jsonText);
+  } catch (error) {
+    console.error("Failed to generate or parse flashcards:", error);
+    throw error;
+  }
+}
+
+export async function generateQuizFromText(text: string, numberOfQuestions: number, difficulty: string, questionTypes: string) {
+  
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: quizSchema,
+    },
+  });
+
+  const prompt = `
+      Create a quiz based on this text.
+      Requirements:
+      - Questions: ${numberOfQuestions}
+      - Difficulty: ${difficulty}
+      - Types: ${questionTypes}
+      
+      TEXT:
+      ${text}
+    `;
 
   try {
     const result = await model.generateContent(prompt);

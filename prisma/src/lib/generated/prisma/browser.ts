@@ -53,6 +53,11 @@ export type QuizQuestion = Prisma.QuizQuestionModel
  */
 export type QuizResult = Prisma.QuizResultModel
 /**
+ * Model QuizJob
+ * 
+ */
+export type QuizJob = Prisma.QuizJobModel
+/**
  * Model StudySession
  * 
  */

@@ -1,17 +1,17 @@
+// /workers/index.js (updated)
 import "dotenv/config";
 import { prisma } from "./src/db.js";
 import { extractTextFromPDF } from "./src/pdf.js";
-import { generateFlashcardsFromText } from "./src/gemini.js";
+import { generateFlashcardsFromText, generateQuizFromText } from "./src/gemini.js";
 
-// Define a constant for the maximum number of jobs to process concurrently.
-// This is the primary lever for controlling database connection load.
-const CONCURRENCY_LIMIT = 3; 
+// Define constants for concurrency limits
+const FLASHCARD_CONCURRENCY_LIMIT = 3;
+const QUIZ_CONCURRENCY_LIMIT = 3;
 
 // Helper function to validate URLs
 function isValidUrl(string: string) {
   try {
     const url = new URL(string);
-    // FIX 1: Allow 'r2:' protocol in addition to 'http:' and 'https:'
     return url.protocol === 'http:' || url.protocol === 'https:' || url.protocol === 'r2:'; 
   } catch (_) {
     return false;
@@ -48,8 +48,8 @@ async function executeWithRetry<T>(
   throw lastError!;
 }
 
-async function processJob(job: any) {
-  console.log(`🔄 Processing job ${job.id}: ${job.title} : ${job.fileUrl}`)
+async function processFlashcardJob(job: any) {
+  console.log(`🔄 Processing flashcard job ${job.id}: ${job.title} : ${job.fileUrl}`)
   
   try {
     // Update job status to PROCESSING with retry
@@ -60,24 +60,20 @@ async function processJob(job: any) {
         WHERE id = ${job.id}
       `,
       3,
-      'update job status'
+      'update flashcard job status'
     );
 
     let textContent = ''
 
     // Process based on input type
     if (job.fileUrl) {
-      // FIX 2: Validate URL, now including r2://
       if (!isValidUrl(job.fileUrl)) {
         throw new Error(`Invalid file URL: ${job.fileUrl}. Must be http, https, or r2 protocol.`);
       }
       
       try {
         console.log(`📄 Extracting PDF from path: ${job.fileUrl}...`);
-
-        // FIX 3: Directly call the updated extractTextFromPDF, which now handles R2 download
         textContent = await extractTextFromPDF(job.fileUrl);
-
         console.log(`📄 Extracted ${textContent.length} characters from PDF`);
         
       } catch (fetchError: any) {
@@ -133,13 +129,13 @@ async function processJob(job: any) {
         WHERE id = ${job.id}
       `,
       3,
-      'update job as done'
+      'update flashcard job as done'
     );
 
-    console.log(`✅ Processed job ${job.id}, created set: ${flashcardSet.id}`)
+    console.log(`✅ Processed flashcard job ${job.id}, created set: ${flashcardSet.id}`)
     
   } catch (error: any) {
-    console.error(`❌ Failed job ${job.id}:`, error)
+    console.error(`❌ Failed flashcard job ${job.id}:`, error)
     
     try {
       // Update job as FAILED with retry
@@ -152,25 +148,148 @@ async function processJob(job: any) {
           WHERE id = ${job.id}
         `,
         3,
-        'update job as failed'
+        'update flashcard job as failed'
       );
     } catch (updateError) {
-      console.error(`Failed to update job ${job.id} as FAILED:`, updateError);
+      console.error(`Failed to update flashcard job ${job.id} as FAILED:`, updateError);
+    }
+  }
+}
+
+async function processQuizJob(job: any) {
+  console.log(`🔄 Processing quiz job ${job.id}: ${job.title} : ${job.fileUrl}`)
+  
+  try {
+    // Update job status to PROCESSING with retry
+    await executeWithRetry(
+      () => prisma.$executeRaw`
+        UPDATE quiz_job 
+        SET status = 'PROCESSING' 
+        WHERE id = ${job.id}
+      `,
+      3,
+      'update quiz job status'
+    );
+
+    let textContent = ''
+
+    // Process based on input type
+    if (job.fileUrl) {
+      if (!isValidUrl(job.fileUrl)) {
+        throw new Error(`Invalid file URL: ${job.fileUrl}. Must be http, https, or r2 protocol.`);
+      }
+      
+      try {
+        console.log(`📄 Extracting PDF from path: ${job.fileUrl}...`);
+        textContent = await extractTextFromPDF(job.fileUrl);
+        console.log(`📄 Extracted ${textContent.length} characters from PDF`);
+        
+      } catch (fetchError: any) {
+        if (fetchError.name === 'AbortError') {
+          throw new Error('File download timeout (30 seconds)');
+        }
+        throw fetchError;
+      }
+      
+    } else if (job.text) {
+      textContent = job.text;
+      console.log(`📝 Processing text input (${textContent.length} chars)`);
+    }
+
+    if (!textContent || textContent.length < 50) {
+      throw new Error('Content too short to generate quiz (minimum 50 characters)');
+    }
+
+    // Parse quiz parameters
+    const numberOfQuestions = parseInt(job.numberOfQuestions) || 10;
+    const difficulty = job.difficulty || 'medium';
+    const questionTypes = job.questionTypes ? job.questionTypes.split(',') : ['multiple_choice'];
+
+    // Generate quiz using AI
+    console.log(`🤖 Generating quiz with AI for job ${job.id}...`);
+    console.log(`📊 Parameters: ${numberOfQuestions} questions, ${difficulty} difficulty, types: ${questionTypes.join(', ')}`);
+    
+    const quizData = await generateQuizFromText(
+      textContent, 
+      numberOfQuestions, 
+      difficulty, 
+      questionTypes
+    );
+    
+    console.log(`✅ Generated ${quizData.questions.length} quiz questions for job ${job.id}`);
+
+    // Save quiz with retry
+    const quiz = await executeWithRetry(
+      () => prisma.quiz.create({
+        data: {
+          userId: job.userId,
+          title: job.title,
+          subject: job.subject || 'General',
+          description: `Generated quiz with ${quizData.questions.length} questions (${difficulty} difficulty)`,
+          questions: {
+            create: quizData.questions.map((question: any, index: number) => ({
+              type: question.type.toUpperCase().replace(' ', '_'),
+              question: question.question,
+              options: question.options || [],
+              correctAnswer: typeof question.correctAnswer === 'string' 
+                ? question.correctAnswer 
+                : JSON.stringify(question.correctAnswer),
+              order: index
+            }))
+          }
+        },
+        include: { questions: true }
+      }),
+      3,
+      'create quiz'
+    );
+
+    // Update job with result using raw SQL with retry
+    await executeWithRetry(
+      () => prisma.$executeRaw`
+        UPDATE quiz_job 
+        SET 
+          status = 'DONE',
+          "quizId" = ${quiz.id}
+        WHERE id = ${job.id}
+      `,
+      3,
+      'update quiz job as done'
+    );
+
+    console.log(`✅ Processed quiz job ${job.id}, created quiz: ${quiz.id}`)
+    
+  } catch (error: any) {
+    console.error(`❌ Failed quiz job ${job.id}:`, error)
+    
+    try {
+      // Update job as FAILED with retry
+      await executeWithRetry(
+        () => prisma.$executeRaw`
+          UPDATE quiz_job 
+          SET 
+            status = 'FAILED',
+            error = ${error.message || 'Unknown error'}
+          WHERE id = ${job.id}
+        `,
+        3,
+        'update quiz job as failed'
+      );
+    } catch (updateError) {
+      console.error(`Failed to update quiz job ${job.id} as FAILED:`, updateError);
     }
   }
 }
 
 /**
  * Executes a list of promise-returning functions with a concurrency limit.
- * This is the mechanism that controls parallel processing.
- * @param tasks An array of functions that return promises (e.g., () => processJob(job)).
+ * @param tasks An array of functions that return promises.
  * @param limit The maximum number of promises to run at the same time.
  */
 async function runInBatches<T>(tasks: (() => Promise<T>)[], limit: number) {
   const active: Promise<T>[] = [];
   let index = 0;
 
-  // Function to process the next task
   const runNext = async () => {
     if (index >= tasks.length) {
       return;
@@ -179,46 +298,31 @@ async function runInBatches<T>(tasks: (() => Promise<T>)[], limit: number) {
     const task = tasks[index++];
     const promise = task();
     
-    // Add the promise to the active list
     active.push(promise);
     
-    // Wait for the current promise to settle
     try {
         await promise;
     } catch (e) {
         // Error already logged in processJob, safely continue.
     }
     
-    // Remove the settled promise from the active list
     active.splice(active.indexOf(promise), 1);
-    
-    // Recursively check if there's more work to do
     return runNext();
   };
 
-  // Start the initial batch of promises up to the limit
   const initialBatch = [];
   for (let i = 0; i < limit && i < tasks.length; i++) {
     initialBatch.push(runNext());
   }
 
-  // Wait for the entire initial batch (and all subsequent tasks they trigger) to complete
   await Promise.all(initialBatch);
 }
 
-
-async function pollJobs() {
-  if (shutdownRequested) {
-    return;
-  }
-  
-  console.log('🔍 Polling for new jobs...')
-  
+async function pollFlashcardJobs() {
   try {
-    // Fetch a batch larger than CONCURRENCY_LIMIT to keep the worker busy.
-    const BATCH_SIZE = CONCURRENCY_LIMIT * 2; 
+    const BATCH_SIZE = FLASHCARD_CONCURRENCY_LIMIT * 2;
 
-    // Find pending jobs with retry
+    // Find pending flashcard jobs with retry
     const pendingJobs = await executeWithRetry(
       () => prisma.$queryRaw<any[]>`
         SELECT 
@@ -236,23 +340,84 @@ async function pollJobs() {
         LIMIT ${BATCH_SIZE}
       `,
       3,
-      'find pending jobs'
+      'find pending flashcard jobs'
     );
 
     if (pendingJobs.length === 0) {
-      return;
+      return false;
     }
 
-    console.log(`📋 Found ${pendingJobs.length} pending jobs. Processing ${Math.min(pendingJobs.length, CONCURRENCY_LIMIT)} in parallel.`);
+    console.log(`📋 Found ${pendingJobs.length} pending flashcard jobs. Processing ${Math.min(pendingJobs.length, FLASHCARD_CONCURRENCY_LIMIT)} in parallel.`);
     
-    // Create a list of functions that return a promise (thunks)
-    const jobPromises = pendingJobs.map(job => () => processJob(job));
+    const jobPromises = pendingJobs.map(job => () => processFlashcardJob(job));
+    await runInBatches(jobPromises, FLASHCARD_CONCURRENCY_LIMIT);
     
-    // Run the job processing with the set concurrency limit
-    await runInBatches(jobPromises, CONCURRENCY_LIMIT);
-    
+    return pendingJobs.length > 0;
   } catch (error) {
-    console.error('Polling error:', error)
+    console.error('Flashcard polling error:', error);
+    return false;
+  }
+}
+
+async function pollQuizJobs() {
+  try {
+    const BATCH_SIZE = QUIZ_CONCURRENCY_LIMIT * 2;
+
+    // Find pending quiz jobs with retry
+    const pendingJobs = await executeWithRetry(
+      () => prisma.$queryRaw<any[]>`
+        SELECT 
+          id,
+          "userId",
+          "fileUrl",
+          "text",
+          title,
+          "numberOfQuestions",
+          difficulty,
+          "questionTypes",
+          status
+        FROM quiz_job 
+        WHERE status = 'PENDING' 
+        ORDER BY "createdAt" ASC 
+        LIMIT ${BATCH_SIZE}
+      `,
+      3,
+      'find pending quiz jobs'
+    );
+
+    if (pendingJobs.length === 0) {
+      return false;
+    }
+
+    console.log(`📋 Found ${pendingJobs.length} pending quiz jobs. Processing ${Math.min(pendingJobs.length, QUIZ_CONCURRENCY_LIMIT)} in parallel.`);
+    
+    const jobPromises = pendingJobs.map(job => () => processQuizJob(job));
+    await runInBatches(jobPromises, QUIZ_CONCURRENCY_LIMIT);
+    
+    return pendingJobs.length > 0;
+  } catch (error) {
+    console.error('Quiz polling error:', error);
+    return false;
+  }
+}
+
+async function pollJobs() {
+  if (shutdownRequested) {
+    return;
+  }
+  
+  console.log('🔍 Polling for new jobs...')
+  
+  let hadWork = false;
+  
+  // Poll both types of jobs
+  const flashcardResult = await pollFlashcardJobs();
+  const quizResult = await pollQuizJobs();
+  
+  hadWork = flashcardResult || quizResult;
+  
+  if (!hadWork) {
+    console.log('😴 No pending jobs found, waiting for next poll...');
   }
 }
 
@@ -277,7 +442,7 @@ async function safePollJobs() {
 
 // Run worker
 async function main() {
-  console.log('🚀 Flashcard Worker Started')
+  console.log('🚀 AI Worker Started - Processing both flashcards and quizzes')
   
   // Test database connection with retry
   try {
