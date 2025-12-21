@@ -26,7 +26,7 @@ export async function generateFlashcardsFromText(text: string) {
   // 2. Initialize the model with the schema in generationConfig
   // Note: Using 'gemini-1.5-flash' or 'gemini-2.0-flash' as per official docs
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
+    model: "gemini-2.5-flash",
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: flashcardSchema,
