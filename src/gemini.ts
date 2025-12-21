@@ -59,7 +59,7 @@ ${text}
 
     return JSON.parse(raw);
   } catch (error) {
-    console.error("Failed to parse JSON:", raw.substring(0, 500));
-    throw new Error(`Invalid JSON from Gemini: ${error instanceof Error ? error.message : String(error)}`);
+    console.error("Failed to parse JSON:", raw);
+    throw new Error(`Invalid JSON ${raw} from Gemini: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
