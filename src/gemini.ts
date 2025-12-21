@@ -32,7 +32,21 @@ ${text}
 `;
 
   const result = await model.generateContent(prompt);
-  const raw = result.response.text();
+  let raw = result.response.text();
 
-  return JSON.parse(raw.replace(/```json|```/g, "").trim());
+  // Remove markdown code blocks
+  raw = raw.replace(/```json\n?|```\n?/g, "").trim();
+
+  // Extract JSON array if it's wrapped in other text
+  const jsonMatch = raw.match(/\[[\s\S]*\]/);
+  if (jsonMatch) {
+    raw = jsonMatch[0];
+  }
+
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    console.error("Failed to parse JSON:", raw.substring(0, 500));
+    throw new Error(`Invalid JSON from Gemini: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
